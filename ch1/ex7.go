@@ -16,11 +16,12 @@ func main() {
 
         //b, err := ioutil.ReadAll(resp.Body)
 
-        io.Copy(os.Stdout, resp)
+        nbytes, err := io.Copy(ioutil.Discard, resp.Body) //ioutil.Discard referencing to the answer
         if err != nil {
             fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
         }
 
+        fmt.Fprintf(os.Stdout, "%7d\n", nbytes)
 
     }
 
