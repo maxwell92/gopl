@@ -8,13 +8,15 @@ import (
 var i int
 
 func main() {
-	n, _ err := strconv.Atoi(os.Args[1])
+	n, _ := strconv.Atoi(os.Args[1])
 	i = 0
 	fmt.Println(fibo(n))
 }
 
 func fibo(n int) int {	
-	if i < n {
-		return fibo(a) + fibo(b)	
-	}	
+	if n == 1 || n == 2{
+		return 1	
+	} else {
+		return fibo(n - 1) + fibo(n - 2)	
+	}
 }
