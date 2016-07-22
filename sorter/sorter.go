@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io"
+	//"io"
 	"os"
 	"strconv"
 	"time"
@@ -31,7 +31,7 @@ func readValues(infile string) (values []int, err error) {
 	values = make([]int, 0)
 
 	for {
-		line, isPrefix, err! := br.Readline()	
+		line, isPrefix, err1 := br.ReadLine()	
 
 		if err1 != nil {
 			err = err1	
@@ -47,6 +47,7 @@ func readValues(infile string) (values []int, err error) {
 		str := string(line)
 	
 		value, err1 := strconv.Atoi(str)
+        fmt.Println(value)
 
 		if err1 != nil {
 			err = err1
@@ -55,11 +56,11 @@ func readValues(infile string) (values []int, err error) {
 
 		values = append(values, value)
 	}
-	return 
+    return
 }
 
 func writeValues(values []int, outfile string) error {
-	file, err := os.Create(noutfile)
+	file, err := os.Create(outfile)
 	if err != nil {
 		fmt.Println("Failed to create the output file ", outfile)	
 		return err
