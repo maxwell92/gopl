@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;gopl&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../src/github.com" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <excluded>
+      <root url="file://$PROJECT_DIR$" />
+    </excluded>
+  </library>
+</component>
