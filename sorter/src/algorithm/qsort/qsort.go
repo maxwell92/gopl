@@ -13,7 +13,7 @@ func quickSort(values []int, left, right int) {
 			values[p] = values[j]
 			p = j
 		}
-		if values[i] <= temp && i <=p {
+		if values[i] <= temp && i <= p {
 			i++	
 		}
 		if i <= p {

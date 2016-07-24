@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	//"io"
+    "io"
 	"os"
 	"strconv"
 	"time"
@@ -35,8 +35,8 @@ func readValues(infile string) (values []int, err error) {
 
 		if err1 != nil {
 			err = err1	
+		    break
 		}
-		break
 	
 
 		if isPrefix {
@@ -47,7 +47,6 @@ func readValues(infile string) (values []int, err error) {
 		str := string(line)
 	
 		value, err1 := strconv.Atoi(str)
-        fmt.Println(value)
 
 		if err1 != nil {
 			err = err1
@@ -84,7 +83,7 @@ func main() {
 	}
 
 	values, err := readValues(*infile)
-	if err == nil {
+	if err == io.EOF {
 		t1 := time.Now()	
 		switch *algorithm {
 			case "qsort":
