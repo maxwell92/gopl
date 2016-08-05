@@ -1,4 +1,5 @@
-package mlib
+//package mlib
+package main
 import (
     "testing"
 )

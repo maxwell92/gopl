@@ -14,7 +14,7 @@ type MusicManager struct {
     musics []MusicEntry
 }
 
-func NewMusicManager() *MusicManger{
+func NewMusicManager() *MusicManager{
     return &MusicManager(make([]MusicEntry, 0))
 }
 
