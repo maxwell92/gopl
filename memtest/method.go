@@ -37,7 +37,8 @@ func main() {
 	}
 	// No matter pointer or normal variable it is, method could be called by it.
 	Benz.Print()
-	Benz.Display()
+	(*Benz).Print()
+	(*Benz).Display()
 
 	var BMW Car
 	BMW = Car{
@@ -46,6 +47,7 @@ func main() {
 	}
 
 	BMW.Print()
+	(&BMW).Print()
 	BMW.Display()
 
 }
