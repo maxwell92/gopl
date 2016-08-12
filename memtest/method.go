@@ -13,6 +13,7 @@ type Car struct {
 func (mycar *Car) Print() {
 	//fmt.Println(myCar.Name) //myCar undefined.
 	//fmt.Println(Name) // Name undefined.
+	// The pointer receiver is only used for refer to the method. not a real entity. so the member cann't be accessed.
 	//name := myCar.Name
 	//fmt.Println(name)
 
