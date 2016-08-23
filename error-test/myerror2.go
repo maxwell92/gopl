@@ -28,6 +28,6 @@ func Errorf(format string, arg ...interface{}) *myerror {
 func main() {
 	err := New("abc error")
 	fmt.Println(err.Error())
-
+	fmt.Println(err.text)
 	fmt.Println(Errorf("this is error").Error())
 }
