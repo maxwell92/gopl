@@ -42,12 +42,12 @@ func (l LogLevel) Log() string {
 }
 
 func (y *YceLogger) Printf(level LogLevel, funcName, context string) {
-	y.Logger.SetPrefix(fmt.Sprintf("%s [%s] ", time.Now().Format("2006-01-02 15:04:05"), level.Log()))
+	y.Logger.SetPrefix(fmt.Sprintf("%s [%s] ", time.Now().Format("2006-01-02 15:04:05.000"), level.Log()))
 	y.Logger.Printf("%s: %s\n", funcName, context)
 }
 
 func (y *YceLogger) Fatalf(level LogLevel, funcName, context string) {
-	y.Logger.SetPrefix(fmt.Sprintf("%s [%s] ", time.Now().Format("2006-01-02 15:04:05"), level.Log()))
+	y.Logger.SetPrefix(fmt.Sprintf("%s [%s] ", time.Now().Format("2006-01-02 15:04:05.000"), level.Log()))
 	y.Logger.Fatalf("%s: %s\n", funcName, context)
 
 }
