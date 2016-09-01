@@ -18,4 +18,6 @@ var errmap = map[int]string{
 
 func main() {
 	fmt.Println(errmap[bc])
+	errmap[4] = "abc"
+	fmt.Println(errmap)
 }
