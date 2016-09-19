@@ -75,6 +75,7 @@ func IsDNS1123Subdomain(value string) []string {
 
 func main() {
 	domain := "www.yeepay.com"
+	//domain := "test-nginx.1.8"
 	//domain := "aaa"
 	//fmt.Printf("%s\n%s\n", domain, maskTrailingDash(domain))
 
