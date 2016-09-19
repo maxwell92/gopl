@@ -74,16 +74,21 @@ func IsDNS1123Subdomain(value string) []string {
 }
 
 func main() {
-	domain := "www.yeepay.com"
+	domain1 := "www.yeepay.com"
+	//domain2 := "test-nginx:1.7.9"
+	domain2 := "www.yeepay.com"
 	//domain := "test-nginx.1.8"
 	//domain := "aaa"
 	//fmt.Printf("%s\n%s\n", domain, maskTrailingDash(domain))
 
 	fmt.Printf("label: %s\n", dns1123LabelFmt)
 	fmt.Printf("subdomain: %s\n", dns1123SubdomainFmt)
-	fmt.Printf("domain: %s\n", domain)
-	fmt.Printf("%v\n", IsDNS1123Subdomain(domain))
+	fmt.Printf("domain1: %s\n", domain1)
+	fmt.Printf("domain2: %s\n", domain2)
+	fmt.Printf("%v\n", IsDNS1123Subdomain(domain1))
+	fmt.Printf("%v\n", IsDNS1123Label(domain2))
 
 	fmt.Printf("subdomainRegexp: %s\n", dns1123SubdomainRegexp.String())
+	fmt.Printf("labelRegexp: %s\n", dns1123LabelRegexp.String())
 
 }
