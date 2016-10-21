@@ -19,7 +19,6 @@ type msgController struct {
 }
 
 func (s showController) Get() {
-	//fmt.Println(s.msg) //TODO: why s.msg is "" ???
 	s.msg = "Hello World"
 	s.Write(s.msg)
 }
