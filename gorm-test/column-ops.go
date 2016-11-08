@@ -39,6 +39,7 @@ func main() {
 	// 3rd param: ONDELETE
 	// 4th param: ONUPDATE
 
+	// hasn't been tested below
 	db.Model(&User{}).AddForeignKey("city_id", "cities(id)", "RESTRICT", "RESTRICT")
 	fmt.Println("added foreign key")
 }
