@@ -30,7 +30,7 @@ func main() {
 	//db.Model(&Product{}).ModifyColumn("code", "int")
 	//fmt.Println("modified column of  products")
 
-	// drop column ocde from model `User`
+	// drop column code from model `User`
 	//db.Model(&User{}).DropColumn("code")
 
 	// Add Foreign Key
