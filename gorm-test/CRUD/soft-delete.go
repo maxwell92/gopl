@@ -8,6 +8,7 @@ import (
 
 type Car struct {
 	gorm.Model
+	Id   int32
 	Name string
 }
 
@@ -18,19 +19,21 @@ func main() {
 		panic("Connecting to Database Error")
 	}
 	defer db.Close()
-	a := &Car{
-		Name: "RangeRover",
-	}
 
-	db.Create(&a)
-	fmt.Println(db.NewRecord(a))
 	/*
-		db.Delete(&a)
-		var b Car
-		db.Where("name = ?", "RangeRover").Find(&b)
-		fmt.Printf("%s\n", b.Name)
+		a := &Car{
+			Name: "RangeRover",
+		}
+
+		db.Create(&a)
+		fmt.Println(db.NewRecord(a))
+			db.Delete(&a)
+			var b Car
+			db.Where("name = ?", "RangeRover").Find(&b)
+			fmt.Printf("%s\n", b.Name)
 	*/
 	var e Car
 	db.Where("name = ?", "RangeRover").Find(&e)
+	fmt.Printf("%d\n", e.Id)
 	//fmt.Printf("%s\n", e.deleted_at) // if deleted_at is not member in Struct Car, it won't be printed.
 }
