@@ -13,6 +13,12 @@ type Student struct {
 	Birthday string
 }
 
+type Member struct {
+	gorm.Model
+	Name string
+	Age  int32
+}
+
 func main() {
 	// Connecting to Database
 	db, err := gorm.Open("mysql", "root:root@tcp(mysql.yce:3306)/ormtest?charset=utf8&parseTime=True&loc=Local")
@@ -75,4 +81,80 @@ func main() {
 	var num3 int
 	db.Table("students").Count(&num3)
 	fmt.Printf("select count: %d\n", num3)
+
+	// Group & Having
+	// Don't know how does it works.
+	//rows, err := db.Table("students").Select("date(created_at) as date, sum(amount) as total").Group("date(created_at)").Rows()
+	//	for rows.Next() {
+	//		l := new(Student)
+	//		rows.Scan(&l)
+	//		fmt.Printf("select group next: %s", l.Name)
+	//	}
+
+	//rows1, err := db.Table("students").Select("date(created_at) as date, sum(amount) as total").Group("date(created_at)").Having("sum(amount) > ?", 100).Rows()
+
+	//	k := make(Student)
+	//	db.Table("students").Select("date(created_at) as date, sum(amount) as total").Group("date(created_at)").Having("sum(amount)>?", 100).Scan(&k)
+	//	fmt.Printf("select group having scan: %s\n", k.Name)
+
+	// Join
+	// rows, err := db.Table("students").Select("students.name, schools.name").Joins("left join schools on schools.student_id = students.id").Rows()
+
+	// db.Table("students").Select("students.name, schools.name").Join("left join schools on schools.student_id = students.id").Scan(&results)
+	// db.Joins("JOIN schools ON schools.student_id = students.id AND users.name = ?", "Jack").Joins("JOIN grades ON grades.students_id = students.id").Where("grades.students_id = ?", "04091079").Find(&Jack)
+
+	// Pluck
+	var ages []int32
+	db.Find(&Student{}).Pluck("age", &ages)
+	fmt.Printf("select pluck: %v\n", ages)
+
+	var names []string
+	// get one result
+	db.Find(&Student{}).Pluck("name", &names)
+	fmt.Printf("select pluck: %v\n", names)
+	// only this will be just a model, names = []
+	db.Model(&Student{}).Pluck("name", &names)
+	fmt.Printf("select pluck: %v\n", names)
+	// only this will get data, names = ["Jack", "Jimmy", "Justin", "None"]
+	db.Table("users").Pluck("name", &names)
+	fmt.Printf("select pluck: %v\n", names)
+
+	// Scan
+	var m Member
+	db.Table("students").Select("name, age").Where("name = ?", "Jack").Scan(&m)
+	fmt.Printf("scan: %s\t%d\n", m.Name, m.Age)
+
+	var n Member
+	db.Raw("SELECT name, age FROM students WHERE name=?", "Jack").Scan(&n)
+	fmt.Printf("scan: %s\t%d\n", n.Name, n.Age)
+
+	var o Student
+
+	// Scopes
+	db.Scopes(AgeGreaterThan10, NameIsNotJack).Find(&o)
+	fmt.Printf("Scopes: %s\n", o.Name)
+
+	//  var p Student
+	//	db.Scopes(NameStatus("Jack")).Find(&p)
+	//	fmt.Printf("Scopes: %s\n", p.Name)
+
+	// Specifying The Table Name
+	//	db.Table("users").CreateTable(&Member{})
+	var q Student
+	db.Table("students").Where("name = ?", "Jack").Find(&q)
+	fmt.Printf("Scopes: %s, %d\n", q.Name, q.Age)
+}
+
+func AgeGreaterThan10(db *gorm.DB) *gorm.DB {
+	return db.Where("age > ?", 10)
+}
+
+func NameIsNotJack(db *gorm.DB) *gorm.DB {
+	return db.Where("name <> ?", "Jack")
+}
+
+func NameStatus(name string) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Scopes(AgeGreaterThan10).Where("Name = ?", name)
+	}
 }
