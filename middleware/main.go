@@ -41,9 +41,11 @@ func (b Benz) Get() {
 	fmt.Println("benz get")
 }
 
-func (b *Benz) BenzInfo(ctx *iris.Context) {
+func (b Benz) BenzInfo(ctx *iris.Context) {
 	ctx.Write(b.Show())
+	//b.Write(b.Show())
 	ctx.Next()
+	//b.Next()
 }
 
 func Hi(ctx *iris.Context) {
@@ -65,7 +67,7 @@ func main() {
 	//iris.API("/bmw", *bmw, bmw.BmwInfo)
 	iris.API("/bmw", *bmw)
 	//iris.API("/benz", *benz, Display)
-	//iris.API("/benz", *benz, benz.BenzInfo) // This is benz. benz get.
+	iris.API("/benz", *benz, benz.BenzInfo) // This is benz. benz get.
 	//iris.API("/benz", *benz, benz.BenzInfo, Hi) // This is benz.Hi.
 	iris.Listen(":8081")
 }
