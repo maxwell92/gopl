@@ -8,6 +8,7 @@ import (
 func main() {
 	str := "Hello World"
 	l := len(str)
+	fmt.Println(str)
 	fmt.Printf("str[%d]: %v\n", 0, str[0])
 	fmt.Printf("str[%d]: %v\n", l-1, str[l-1])
 
