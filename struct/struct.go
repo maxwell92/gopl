@@ -29,4 +29,9 @@ func main() {
 	s3 := new(struct3)
 	fmt.Println("s3: %v\ts3.member: %v\n", &s3, &s3.member)
 	fmt.Println("s3: %v\ts3.member: %v\n", s3, s3.member)
+
+	s31 := new(struct3)
+	s31.member = new(struct2)
+	fmt.Println("s31: %v\ts31.member: %v\n", &s3, &s3.member)
+	fmt.Println("s31: %v\ts31.member: %v\n", s3, s3.member)
 }
