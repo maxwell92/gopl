@@ -6,8 +6,16 @@ type Thing interface {
 	Print()
 }
 
-type Id int
-type Name string
+//type Id int
+//type Name string
+
+type IdStruct struct {
+	Thing
+	Id int
+}
+
+type NameStruct struct {
+}
 
 func (i *Id) Print() {
 	fmt.Println("This is Number")
