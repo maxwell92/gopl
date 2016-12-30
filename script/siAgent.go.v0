@@ -11,40 +11,33 @@ import (
 
 var count int
 
-type Job struct {
-	Image  string `json:"image"`
-	Expire int    `json:"expire"`
-	Status string `json:"status,omitempty"`
+type Image struct {
+	Name string `json:"name"`
 }
-
-const (
-	SUCC   = "SUCC"
-	FAILED = "FAILED"
-)
 
 type OperationAPI struct {
 	*iris.Context
 	scriptPath string
-	Job        *Job `json:"job"`
+	Image      *Image `json:"image"`
 }
 
 var usage = `Usage: siAgent <filepath>
 `
 
-var waitJobQueue chan *Job
+var imageQueue chan string
 
 func sync(script string) {
 	for {
 		select {
-		case job := <-waitJobQueue:
+		case image := <-imageQueue:
 			{
-				log.Printf("%s: Waiting --> Running\n", job.Image)
-				cmd := exec.Command("/bin/bash", "-C", script, job.Image)
+				log.Printf("Sync Start: %s\n", image)
+				cmd := exec.Command("/bin/bash", "-C", script, image)
 				err := cmd.Run()
 				if err != nil {
 					log.Println("Sync Error: err=%s\n", err)
 				}
-				log.Printf("%s: Running --> Finish\n", job.Image)
+				log.Printf("Sync over: %s\n", image)
 
 			}
 		}
@@ -53,15 +46,17 @@ func sync(script string) {
 }
 
 func (op OperationAPI) Post() {
-	op.Job = new(Job)
-	err := op.ReadJSON(op.Job)
+	log.Println("Received sync request")
+	op.Image = new(Image)
+	err := op.ReadJSON(op.Image)
 	if err != nil {
 		log.Printf("ReadJSON Error: err=%s\n", err)
 	} else {
 		count++
 		cnt := strconv.Itoa(count)
-		op.Job.Image += cnt
-		waitJobQueue <- op.Job
+		op.Image.Name += cnt
+		log.Println(op.Image.Name)
+		imageQueue <- op.Image.Name
 	}
 
 }
@@ -91,8 +86,7 @@ func Init() *OperationAPI {
 func main() {
 	UsageAndExit()
 	op := Init()
-	waitJobQueue = make(chan *Job, 10)
-
+	imageQueue = make(chan string, 1)
 	count = 0
 	go sync(op.scriptPath)
 

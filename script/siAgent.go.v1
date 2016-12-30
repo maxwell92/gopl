@@ -32,24 +32,41 @@ var usage = `Usage: siAgent <filepath>
 `
 
 var waitJobQueue chan *Job
+var runJobQueue chan *Job
+var finJobQueue chan *Job
 
 func sync(script string) {
 	for {
 		select {
-		case job := <-waitJobQueue:
+		case job := <-runJobQueue:
 			{
-				log.Printf("%s: Waiting --> Running\n", job.Image)
+				//	log.Printf("Sync Start: %s\n", image)
 				cmd := exec.Command("/bin/bash", "-C", script, job.Image)
 				err := cmd.Run()
 				if err != nil {
 					log.Println("Sync Error: err=%s\n", err)
 				}
+				finJobQueue <- job
 				log.Printf("%s: Running --> Finish\n", job.Image)
+				//log.Printf("Sync over: %s\n", image)
 
 			}
 		}
 	}
 
+}
+
+func retrieve() {
+	for {
+		select {
+		case job := <-waitJobQueue:
+			{
+				runJobQueue <- job
+				log.Printf("%s: Waiting --> Running\n", job.Image)
+
+			}
+		}
+	}
 }
 
 func (op OperationAPI) Post() {
@@ -92,9 +109,12 @@ func main() {
 	UsageAndExit()
 	op := Init()
 	waitJobQueue = make(chan *Job, 10)
+	runJobQueue = make(chan *Job, 1)
+	finJobQueue = make(chan *Job, 10)
 
 	count = 0
 	go sync(op.scriptPath)
+	go retrieve()
 
 	iris.API("/sync", *op)
 	iris.Listen(":8081")

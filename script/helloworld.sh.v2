@@ -8,8 +8,7 @@ while [ $base -lt $end ]
 do
     echo "Hello" $1 $base
     base=$((base + 1))
-    SLEEPTIME=$((RANDOM % 20))
-    sleep $SLEEPTIME 
+    sleep 2 
 done
 
 # echo "Hello World"
