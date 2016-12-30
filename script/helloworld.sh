@@ -6,7 +6,7 @@ end=10
 
 while [ $base -lt $end ]
 do
-    echo "Hello World" $base
+    echo "Hello" $1 $base
     base=$((base + 1))
     sleep 2 
 done

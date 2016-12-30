@@ -3,43 +3,62 @@ package main
 import (
 	"fmt"
 	"github.com/kataras/iris"
+	"log"
 	"os"
 	"os/exec"
+	"strconv"
 )
+
+var count int
+
+type Image struct {
+	Name string `json:"name"`
+}
 
 type OperationAPI struct {
 	*iris.Context
 	scriptPath string
+	Image      *Image `json:"image"`
 }
 
 var usage = `Usage: siAgent <filepath>
 `
 
-// op here is hot the same with the oen in Init()
-func (op OperationAPI) Get() {
-	fmt.Println("Sync Start")
-	/*
-		cmd := exec.Command("/bin/bash", "-C", "./helloworld.sh")
-		result, err := cmd.Output()
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(result))
-	*/
+var imageQueue chan string
 
-	fmt.Printf("filepath: %s", op.scriptPath)
-	//cmd := exec.Command("/bin/bash", "-C", op.scriptPath)
-	cmd := exec.Command("/bin/bash", "-C", "./helloworld.sh")
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println(err)
-		op.Write("Sync Error\n", err)
+func sync(script string) {
+	for {
+		select {
+		case image := <-imageQueue:
+			{
+				log.Printf("Sync Start: %s\n", image)
+				cmd := exec.Command("/bin/bash", "-C", script, image)
+				err := cmd.Run()
+				if err != nil {
+					log.Println("Sync Error: err=%s\n", err)
+				}
+				log.Printf("Sync over: %s\n", image)
+
+			}
+		}
 	}
-	fmt.Println("Sync over")
-	/*
-		o.Write(string(result))
-	*/
-	op.Write("Sync Over\n")
+
+}
+
+func (op OperationAPI) Post() {
+	log.Println("Received sync request")
+	op.Image = new(Image)
+	err := op.ReadJSON(op.Image)
+	if err != nil {
+		log.Printf("ReadJSON Error: err=%s\n", err)
+	} else {
+		count++
+		cnt := strconv.Itoa(count)
+		op.Image.Name += cnt
+		log.Println(op.Image.Name)
+		imageQueue <- op.Image.Name
+	}
+
 }
 
 func UsageAndExit() {
@@ -50,22 +69,27 @@ func UsageAndExit() {
 
 }
 
-func Init() {
-
+func Init() *OperationAPI {
 	op := new(OperationAPI)
 	op.scriptPath = os.Args[1]
 
 	f, err := os.Open(op.scriptPath)
 	defer f.Close()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
-	iris.API("/sync", *op)
-	iris.Listen(":8081")
+
+	return op
 }
 
 func main() {
 	UsageAndExit()
-	Init()
+	op := Init()
+	imageQueue = make(chan string, 1)
+	count = 0
+	go sync(op.scriptPath)
+
+	iris.API("/sync", *op)
+	iris.Listen(":8081")
 }
