@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func main() {
 	str := make([]string, 0)
@@ -8,4 +11,8 @@ func main() {
 
 	str = append(str, "")
 	fmt.Println(len(str))
+
+	str1 := strings.Join([]string{"Hello", "Mushroom"}, "Strawberry")
+	fmt.Println(str1)
+	fmt.Printf("%v, %d\n", str1, len(str1))
 }
