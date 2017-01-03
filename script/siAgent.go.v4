@@ -1,0 +1,119 @@
+package main
+
+import (
+	"fmt"
+	"github.com/kataras/iris"
+	"log"
+	"os"
+	"os/exec"
+	"strconv"
+	"time"
+)
+
+var count int
+
+type Job struct {
+	Image  string `json:"image"`
+	Expire int    `json:"expire"`
+	Status string `json:"status,omitempty"`
+}
+
+const (
+	SUCC   = "SUCC"
+	FAILED = "FAILED"
+)
+
+type OperationAPI struct {
+	*iris.Context
+	scriptPath string
+	Job        *Job `json:"job"`
+}
+
+var usage = `Usage: siAgent <filepath>
+`
+
+var waitJobQueue chan *Job
+var irisQueue chan OperationAPI
+
+func sync(script string) {
+	for {
+		select {
+		case job := <-waitJobQueue:
+			{
+				log.Printf("%s: Waiting --> Running\n", job.Image)
+				cmd := exec.Command("/bin/bash", "-C", script, job.Image)
+				if cmd == nil {
+					log.Printf("Get Command Error\n")
+					os.Exit(1)
+				}
+				go job.killer(cmd)
+				op := <-irisQueue
+				err := cmd.Run()
+				if err != nil {
+					log.Printf("%s: Running --> Killed\n", job.Image)
+					op.Write("%s Sync Error: err=%s\n", job.Image, err)
+				} else {
+					log.Printf("%s: Running --> Finish\n", job.Image)
+					op.Write("%s Sync Success\n", job.Image)
+				}
+
+			}
+		}
+	}
+}
+
+func (j Job) killer(c *exec.Cmd) {
+	k := time.NewTimer(time.Duration(j.Expire) * time.Second)
+	<-k.C
+	c.Process.Kill()
+}
+
+func (op OperationAPI) Post() {
+	op.Job = new(Job)
+	err := op.ReadJSON(op.Job)
+	if err != nil {
+		log.Printf("ReadJSON Error: err=%s\n", err)
+	} else {
+		count++
+		cnt := strconv.Itoa(count)
+		op.Job.Image += cnt
+		waitJobQueue <- op.Job
+		irisQueue <- op
+	}
+
+}
+
+func UsageAndExit() {
+	if len(os.Args) != 2 {
+		fmt.Fprint(os.Stderr, usage)
+		os.Exit(1)
+	}
+
+}
+
+func Init() *OperationAPI {
+	op := new(OperationAPI)
+	op.scriptPath = os.Args[1]
+
+	f, err := os.Open(op.scriptPath)
+	defer f.Close()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	return op
+}
+
+func main() {
+	UsageAndExit()
+	op := Init()
+	waitJobQueue = make(chan *Job, 10)
+	irisQueue = make(chan OperationAPI, 10)
+
+	count = 0
+	go sync(op.scriptPath)
+
+	iris.API("/sync", *op)
+	iris.Listen(":8081")
+}
