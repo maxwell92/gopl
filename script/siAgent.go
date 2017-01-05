@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-var count int
-
 type Job struct {
 	Image  string `json:"image"`
 	Tag    string `json:"tag"`
@@ -23,9 +21,10 @@ type Job struct {
 }
 
 const (
-	SUCC    = "SUCC"
+	SUCC    = "SUCCEED"
 	FAILED  = "FAILED"
 	RUNNING = "RUNNING"
+	WAITING = "WAITING"
 )
 
 type OperationConfig struct {
@@ -58,6 +57,7 @@ func sync(script, expire string) {
 			{
 				job.Expire, _ = strconv.Atoi(expire)
 				job.Status = RUNNING
+
 				log.Printf("%s: Waiting --> Running\n", job.Image+":"+job.Tag)
 				cmd := exec.Command("/bin/bash", "-C", script, job.Image, job.Tag)
 				if cmd == nil {
@@ -72,14 +72,10 @@ func sync(script, expire string) {
 					job.Status = FAILED
 					log.Printf("%s: Running --> Killed\n", job.Image+":"+job.Tag)
 					finJobQueue <- job
-					//NOTE: in newest version of iris, the Write() function changes to Writef()
-					// op.Write("%s Sync Error: err=%s\n", job.Image, err)
 				} else {
 					job.Status = SUCC
 					log.Printf("%s: Running --> Finish\n", job.Image+":"+job.Tag)
 					finJobQueue <- job
-					//NOTE: in newest version of iris, the Write() function changes to Writef()
-					// op.Write("%s Sync Success\n", job.Image)
 				}
 
 			}
@@ -93,20 +89,6 @@ func (j Job) killer(c *exec.Cmd) {
 	c.Process.Kill()
 }
 
-func (op OperationAPI) Post() {
-	op.Job = new(Job)
-	err := op.ReadJSON(op.Job)
-	if err != nil {
-		log.Printf("ReadJSON Error: err=%s\n", err)
-	} else {
-		count++
-		cnt := strconv.Itoa(count)
-		op.Job.Image += cnt
-		waitJobQueue <- op.Job
-	}
-
-}
-
 func UsageAndExit() {
 	if len(os.Args) != 2 {
 		fmt.Fprint(os.Stderr, usage)
@@ -116,11 +98,9 @@ func UsageAndExit() {
 }
 
 func Init() *OperationAPI {
-
 	op := new(OperationAPI)
 	op.cfg = new(OperationConfig)
 
-	// os.Args[1] will be the configure file location. Default the same directory.
 	cfg, err := os.Open(os.Args[1])
 	defer cfg.Close()
 
@@ -171,19 +151,16 @@ func Init() *OperationAPI {
 
 	waitJobLen, _ := strconv.Atoi(op.cfg.waitQueue)
 	waitJobQueue = make(chan *Job, waitJobLen)
-	finJobLen := waitJobLen
-	finJobQueue = make(chan *Job, finJobLen)
+	finJobQueue = make(chan *Job)
 
 	return op
 }
 
-func SetupWebSocket() {
-	iris.Static("/js", "./static/js", 1)
+func (op OperationAPI) Get() {
+	op.Render("client.html", clientPage{"Client Page", op.HostString()})
+}
 
-	iris.Get("/", func(ctx *iris.Context) {
-		ctx.Render("client.html", clientPage{"Client Page", ctx.HostString()})
-	})
-
+func SetupWebSocket(op *OperationAPI) {
 	iris.Config.Websocket.Endpoint = "/my_endpoint"
 
 	var myChatRoom = "room1"
@@ -198,42 +175,33 @@ func SetupWebSocket() {
 				log.Printf("WS Unmarshal JSON Error: err=%s\n", err)
 				os.Exit(1)
 			}
-			//log.Println(JobSTR)
-			waitJobQueue <- job
 
-			// c.To(myChatRoom).Emit("chat", "From: "+c.ID()+": "+message)
 			c.To(myChatRoom).Emit("chat", job.Image+":"+job.Tag+" Started")
-
-			go func(c iris.WebsocketConnection) {
-				// k := time.NewTimer(time.Duration(2) * time.Second)
-				for {
-					select {
-					/*
-						case <-k.C:
-							c.To(myChatRoom).Emit("chat", job.image+":"+job.tag+" is "+job.Status)
-					*/
-					case <-finJobQueue:
-						c.To(myChatRoom).Emit("chat", job.Image+":"+job.Tag+" is "+job.Status)
-					}
-				}
-			}(c)
+			job.Status = WAITING
+			waitJobQueue <- job
 		})
+
+		go func(c iris.WebsocketConnection) {
+			for {
+				select {
+				case job := <-finJobQueue:
+					c.To(myChatRoom).Emit("chat", job.Image+":"+job.Tag+" is "+job.Status)
+				}
+			}
+		}(c)
 
 		c.OnDisconnect(func() {
-			fmt.Printf("\nConnection with ID: %s has been disconnected!", c.ID())
 		})
 	})
+
+	iris.Static("/js", "./static/js", 1)
+	iris.API("/", *op)
 	iris.Listen(":8080")
 }
 
 func main() {
 	UsageAndExit()
 	op := Init()
-	count = 0
 	go sync(op.cfg.script, op.cfg.expire)
-	SetupWebSocket()
-	/*
-		iris.API("/sync", *op)
-		iris.Listen(":8081")
-	*/
+	SetupWebSocket(op)
 }
