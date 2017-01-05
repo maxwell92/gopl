@@ -84,10 +84,42 @@ func sync(script, expire string) {
 }
 
 func (j Job) killer(c *exec.Cmd) {
+	k := time.NewTimer(time.Duration(2) * time.Second)
+	<-k.C
+
+	log.Printf("Process pid1: %d\n", c.Process.Pid)
+	// PorcessState only works for the process who exited
+	// log.Printf("ProcessState pid2: %d, status: %s\n", c.ProcessState.Pid(), c.ProcessState.String())
+	log.Printf("/proc/ status: %s\n", func() string {
+		pid := strconv.Itoa(c.Process.Pid)
+		f, err := os.Open("/proc/" + pid + "/status")
+		if err != nil {
+			log.Printf("Open proc file Error: err=%s\n", err)
+		}
+		reader := bufio.NewReader(f)
+		scanner := bufio.NewScanner(reader)
+
+		for scanner.Scan() {
+			str := scanner.Text()
+			if strings.Contains(str, "State") {
+				status := strings.Split(strings.Split(str, "(")[1], ")")[0]
+				return status
+			}
+		}
+		return ""
+	})
+	t := time.NewTimer(time.Duration(j.Expire) * time.Second)
+	<-t.C
+	c.Process.Kill()
+}
+
+/*
+func (j Job) killer(c *exec.Cmd) {
 	k := time.NewTimer(time.Duration(j.Expire) * time.Second)
 	<-k.C
 	c.Process.Kill()
 }
+*/
 
 func UsageAndExit() {
 	if len(os.Args) != 2 {
