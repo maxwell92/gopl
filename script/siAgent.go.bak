@@ -18,13 +18,11 @@ type Job struct {
 	Tag    string `json:"tag"`
 	Status string `json:"status,omitempty"`
 	Expire int    `json:"expire"`
-	c      iris.WebsocketConnection
 }
 
 const (
 	SUCC    = "SUCCEED"
 	FAILED  = "FAILED"
-	EXPIRED = "EXPIRED"
 	RUNNING = "RUNNING"
 	WAITING = "WAITING"
 )
@@ -78,18 +76,15 @@ func sync(script, expire string) {
 
 				go job.killer(cmd)
 
-				job.c.To("syncImage").Emit("sync", job.Encode())
 				err := cmd.Run()
 				if err != nil {
 					job.Status = FAILED
 					log.Printf("%s: Running --> Killed\n", job.Image+":"+job.Tag)
-					job.c.To("syncImage").Emit("sync", job.Encode())
-					//finJobQueue <- job
+					finJobQueue <- job
 				} else {
 					job.Status = SUCC
 					log.Printf("%s: Running --> Finish\n", job.Image+":"+job.Tag)
-					job.c.To("syncImage").Emit("sync", job.Encode())
-					//finJobQueue <- job
+					finJobQueue <- job
 				}
 			}
 		}
@@ -164,7 +159,7 @@ func Init() *OperationAPI {
 
 	waitJobLen, _ := strconv.Atoi(op.cfg.waitQueue)
 	waitJobQueue = make(chan *Job, waitJobLen)
-	finJobQueue = make(chan *Job, 1)
+	finJobQueue = make(chan *Job)
 
 	return op
 }
@@ -189,20 +184,19 @@ func SetupWebSocket(op *OperationAPI) {
 				os.Exit(1)
 			}
 			job.Status = WAITING
-			job.c = c
 			c.To(syncImage).Emit("sync", job.Encode())
 			waitJobQueue <- job
 		})
-		/*
-			go func(c iris.WebsocketConnection) {
-				for {
-					select {
-					case job := <-finJobQueue:
-						c.To(syncImage).Emit("sync", job.Encode())
-					}
+
+		go func(c iris.WebsocketConnection) {
+			for {
+				select {
+				case job := <-finJobQueue:
+					c.To(syncImage).Emit("sync", job.Encode())
 				}
-			}(c)
-		*/
+			}
+		}(c)
+
 		c.OnDisconnect(func() {
 		})
 	})

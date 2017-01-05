@@ -18,7 +18,6 @@ type Job struct {
 	Tag    string `json:"tag"`
 	Status string `json:"status,omitempty"`
 	Expire int    `json:"expire"`
-	c      iris.WebsocketConnection
 }
 
 const (
@@ -51,6 +50,7 @@ var usage = `Usage: siAgent <filepath>
 
 var waitJobQueue chan *Job
 var finJobQueue chan *Job
+var runJobQueue chan *Job
 
 func (j Job) Encode() string {
 	jobBYTE, err := json.Marshal(j)
@@ -65,7 +65,7 @@ func (j Job) Encode() string {
 func sync(script, expire string) {
 	for {
 		select {
-		case job := <-waitJobQueue:
+		case job := <-runJobQueue:
 			{
 				job.Expire, _ = strconv.Atoi(expire)
 				job.Status = RUNNING
@@ -78,18 +78,15 @@ func sync(script, expire string) {
 
 				go job.killer(cmd)
 
-				job.c.To("syncImage").Emit("sync", job.Encode())
 				err := cmd.Run()
 				if err != nil {
 					job.Status = FAILED
 					log.Printf("%s: Running --> Killed\n", job.Image+":"+job.Tag)
-					job.c.To("syncImage").Emit("sync", job.Encode())
-					//finJobQueue <- job
+					finJobQueue <- job
 				} else {
 					job.Status = SUCC
 					log.Printf("%s: Running --> Finish\n", job.Image+":"+job.Tag)
-					job.c.To("syncImage").Emit("sync", job.Encode())
-					//finJobQueue <- job
+					finJobQueue <- job
 				}
 			}
 		}
@@ -164,6 +161,7 @@ func Init() *OperationAPI {
 
 	waitJobLen, _ := strconv.Atoi(op.cfg.waitQueue)
 	waitJobQueue = make(chan *Job, waitJobLen)
+	runJobQueue = make(chan *Job, 1)
 	finJobQueue = make(chan *Job, 1)
 
 	return op
@@ -189,20 +187,33 @@ func SetupWebSocket(op *OperationAPI) {
 				os.Exit(1)
 			}
 			job.Status = WAITING
-			job.c = c
 			c.To(syncImage).Emit("sync", job.Encode())
+			log.Printf("[json]: %s\n", job.Encode())
 			waitJobQueue <- job
 		})
-		/*
-			go func(c iris.WebsocketConnection) {
-				for {
-					select {
-					case job := <-finJobQueue:
-						c.To(syncImage).Emit("sync", job.Encode())
-					}
+
+		go func(c iris.WebsocketConnection) {
+			for {
+				select {
+				case job := <-finJobQueue:
+					c.To(syncImage).Emit("sync", job.Encode())
+					log.Printf("[json]: %s\n", job.Encode())
 				}
-			}(c)
-		*/
+			}
+		}(c)
+
+		go func(c iris.WebsocketConnection) {
+			for {
+				select {
+				case job := <-waitJobQueue:
+					job.Status = RUNNING
+					c.To(syncImage).Emit("sync", job.Encode())
+					log.Printf("[json]: %s\n", job.Encode())
+					runJobQueue <- job
+				}
+			}
+		}(c)
+
 		c.OnDisconnect(func() {
 		})
 	})

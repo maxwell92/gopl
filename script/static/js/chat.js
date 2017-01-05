@@ -7,9 +7,10 @@ $(function () {
 	 messages = $("#messages");
 
 
-	w = new Ws("ws://" + HOST + "/my_endpoint");
+	w = new Ws("ws://" + HOST + "/sync");
 	w.OnConnect(function () {
 		console.log("Websocket connection established");
+        console.log(HOST)
 	});
 
 	w.OnDisconnect(function () {
@@ -27,7 +28,7 @@ $(function () {
 
     // var m = ""
 
-    w.On("chat", function (m) {
+    w.On("sync", function (m) {
         appendMessage($("<div>" + m + "</div>")); 
         //console.log(m)
         //console.log(message)
@@ -43,7 +44,7 @@ $(function () {
 
         m = JSON.stringify(message)
         console.log(m)
-        w.Emit("chat", m);
+        w.Emit("sync", m);
 	});
 
 })
