@@ -84,11 +84,13 @@ func sync(script, expire string) {
 					job.Status = FAILED
 					log.Printf("%s: Running --> Killed\n", job.Image+":"+job.Tag)
 					job.c.To("syncImage").Emit("sync", job.Encode())
+					job.c.Disconnect()
 					//finJobQueue <- job
 				} else {
 					job.Status = SUCC
 					log.Printf("%s: Running --> Finish\n", job.Image+":"+job.Tag)
 					job.c.To("syncImage").Emit("sync", job.Encode())
+					job.c.Disconnect()
 					//finJobQueue <- job
 				}
 			}
@@ -178,6 +180,8 @@ func SetupWebSocket(op *OperationAPI) {
 
 	var syncImage = "syncImage"
 	iris.Websocket.OnConnection(func(c iris.WebsocketConnection) {
+
+		log.Printf("Received New Connection")
 		c.Join(syncImage)
 
 		c.On("sync", func(JobSTR string) {
