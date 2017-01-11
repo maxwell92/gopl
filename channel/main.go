@@ -17,4 +17,11 @@ func main() {
 	fmt.Printf("ch2: %v, %s\n", ch2, <-ch2)
 	x, ok := <-ch3 //ok will be bool
 	fmt.Printf("ch3: %v, %v\n", x, ok)
+	// below will cause "too many arguement in range error"
+	/*
+		for k, v := range ch3 {
+			fmt.Println(v)
+		}
+	*/
+
 }
