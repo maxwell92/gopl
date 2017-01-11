@@ -24,4 +24,15 @@ func main() {
 		}
 	*/
 
+	ch4 := make(chan string, 5)
+	ch4 <- "1"
+	ch4 <- "2"
+	ch4 <- "3"
+	ch4 <- "4"
+
+	fmt.Printf("total: %d\n", len(ch4))
+	// range will get element from the channel!
+	for s := range ch4 {
+		fmt.Printf("%s: %d\n", s, len(ch4))
+	}
 }
