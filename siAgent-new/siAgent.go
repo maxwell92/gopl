@@ -3,16 +3,19 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+//	"log"
 	"os"
 	"os/exec"
 	"strconv"
-	"sync"
 	"time"
+
+	"mylog"
 
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/config"
 )
+
+var log = mylog.Log
 
 const (
 	SUCC    = "SUCCEED"
@@ -102,15 +105,11 @@ func syncer(script, expire string) {
 }
 
 func emiter() {
-	mu := new(sync.Mutex)
 	for {
 		select {
 		case job := <-writeJobQueue:
 			{
-				mu.Lock()
-				// defer mu.Unlock()
 				job.c.To("syncImage").Emit("sync", job.Encode())
-				mu.Unlock()
 			}
 		}
 	}
@@ -180,14 +179,9 @@ func SetupWebSocket(op *OperationAPI) {
 	ws := iris.NewWebsocketServer(config)
 	iris.RegisterWebsocketServer(api, ws, api.Logger)
 
-	//iris.Config.Websocket.MaxMessageSize = config.DefaultMaxMessageSize
-	//iris.Config.Websocket.Endpoint = "/sync"
 	counter := 0
 
 	var syncImage = "syncImage"
-	/*
-	iris.Websocket.OnConnection(func(c iris.WebsocketConnection) {
-	*/
 	ws.OnConnection(func (c iris.WebsocketConnection) {
 		c.Join(syncImage)
 		log.Printf("Received new Connection\n")
@@ -229,11 +223,6 @@ func SetupWebSocket(op *OperationAPI) {
 		}(c)
 	})
 
-	/*
-	iris.Static("/js", "./static/js", 1)
-	iris.API("/", *op)
-	iris.Listen(":8081")
-	*/
 	api.Listen(":8081")
 }
 
