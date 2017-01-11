@@ -1,0 +1,125 @@
+{
+  "list": [
+    {
+      "id": 10,
+      "name": "绿色通道",
+      "state": "main.walkthrogh",
+      "includeState": "main.costManage",
+      "className": "fa-rocket",
+      "href": "walkthrogh"
+    },
+    {
+      "id": 2,
+      "name": "应用管理",
+      "state": "main.appManage",
+      "includeState": "main.appManage",
+      "className": "fa-adn",
+      "href": "appManage",
+      "item": [
+        {
+          "id": 21,
+          "name": "应用发布",
+          "state": "main.appManageDeployment",
+          "includeState": "main.appManageDeployment",
+          "href": "appManageDeployment"
+        },
+        {
+          "id": 22,
+          "name": "历史发布",
+          "state": "main.appManageHistory",
+          "includeState": "main.appManageHistory",
+          "href": "appManageHistory"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "服务管理",
+      "state": "main.extensions",
+      "includeState": "main.extensions",
+      "className": "fa-arrows",
+      "href": "extensions",
+      "item": [
+        {
+          "id": 31,
+          "name": "创建服务",
+          "state": "main.extensionsService",
+          "includeState": "main.extensionsService",
+          "href": "extensionsService"
+        },
+        {
+          "id": 32,
+          "name": "创建访问点",
+          "state": "main.extensionsEndpoint",
+          "includeState": "main.extensionsEndpoint",
+          "href": "extensionsEndpoint"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "镜像管理",
+      "state": "main.imageManage",
+      "includeState": "main.imageManage",
+      "className": "fa-file-archive-o",
+      "href": "imageManage",
+      "item": [
+        {
+          "id": 41,
+          "name": "基础镜像",
+          "state": "main.imageManageBase",
+          "includeState": "main.imageManageBase",
+          "href": "imageBase"
+        },
+	{
+          "id": 42,
+          "name": "同步镜像",
+          "state": "main.syncImage",
+          "includeState": "main.syncImage",
+          "href": "syncImage"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "模板管理",
+      "state": "main.tpManage",
+      "includeState": "main.tpManage",
+      "className": "fa-adn",
+      "href": "tpManage",
+      "item": [
+        {
+          "id": 111,
+          "name": "添加模板",
+          "state": "main.addTp",
+          "includeState": "main.addTp",
+          "href": "tpAdd"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Dashboard",
+      "state": "main.dashboard",
+      "includeState": "main.dashboard",
+      "className": "fa-dashboard",
+      "href": "dashBoard"
+    },
+    {
+      "id": 5,
+      "name": "集群拓扑",
+      "state": "main.topology",
+      "includeState": "main.topology",
+      "className": "fa-share-alt",
+      "href": "topology"
+    },
+    {
+      "id": 6,
+      "name": "个人设置",
+      "state": "main.personalSetting",
+      "includeState": "main.personalSetting",
+      "href": "personalSetting",
+      "className": "fa-child"
+    }
+  ]
+}

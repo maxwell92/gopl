@@ -1,0 +1,246 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"strconv"
+	"sync"
+	"time"
+
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/config"
+)
+
+const (
+	SUCC    = "SUCCEED"
+	FAILED  = "FAILED"
+	EXPIRED = "EXPIRED"
+	RUNNING = "RUNNING"
+	WAITING = "WAITING"
+)
+
+type Job struct {
+	Id        int    `json:"id,omitempty"`
+	Image     string `json:"image"`
+	Tag       string `json:"tag"`
+	Status    string `json:"status,omitempty"`
+	Expire    int    `json:"expire"`
+	Op        string `json:"op"`
+	CreatedAt string `json:"createdAt"`
+	c         iris.WebsocketConnection
+}
+
+type OperationConfig struct {
+	script    string
+	waitQueue string
+	expire    string
+}
+
+type OperationAPI struct {
+	*iris.Context
+	cfg *OperationConfig
+	Job *Job `json:"job"`
+}
+
+type clientPage struct {
+	Title string
+	Host  string
+}
+
+var usage = `Usage: siAgent <filepath>
+`
+
+var waitJobQueue chan *Job
+var writeJobQueue chan *Job
+var runFlag bool
+
+func (j Job) Encode() string {
+	jobBYTE, err := json.Marshal(j)
+	if err != nil {
+		log.Printf("Job Encoding Error: err=%s\n", err)
+		os.Exit(1)
+	}
+	jobSTR := string(jobBYTE)
+	return jobSTR
+}
+
+func syncer(script, expire string) {
+	for {
+		select {
+		case job := <-waitJobQueue:
+			{
+				job.Expire, _ = strconv.Atoi(expire)
+				job.Status = RUNNING
+				log.Printf("%s: Waiting --> Running\n", job.Image+":"+job.Tag)
+				cmd := exec.Command("/bin/bash", "-C", script, job.Image, job.Tag)
+				if cmd == nil {
+					log.Printf("Get Command Error\n")
+					os.Exit(1)
+				}
+
+				go job.killer(cmd)
+
+				writeJobQueue <- job
+				runFlag = true
+				err := cmd.Run()
+				runFlag = false
+				if err != nil {
+					job.Status = FAILED
+					log.Printf("%s: Running --> Killed\n", job.Image+":"+job.Tag)
+					writeJobQueue <- job
+				} else {
+					job.Status = SUCC
+					log.Printf("%s: Running --> Finish\n", job.Image+":"+job.Tag)
+					writeJobQueue <- job
+				}
+			}
+		}
+	}
+}
+
+func emiter() {
+	mu := new(sync.Mutex)
+	for {
+		select {
+		case job := <-writeJobQueue:
+			{
+				mu.Lock()
+				// defer mu.Unlock()
+				job.c.To("syncImage").Emit("sync", job.Encode())
+				mu.Unlock()
+			}
+		}
+	}
+}
+
+func (j Job) killer(c *exec.Cmd) {
+	k := time.NewTimer(time.Duration(j.Expire) * time.Second)
+	<-k.C
+	c.Process.Kill()
+}
+
+func UsageAndExit() {
+	if len(os.Args) != 1 {
+		fmt.Fprint(os.Stderr, usage)
+		os.Exit(1)
+	}
+
+}
+
+func Init() *OperationAPI {
+	op := new(OperationAPI)
+	op.cfg = new(OperationConfig)
+
+	op.cfg.script = os.Getenv("SIAGENT_SCRIPT")
+	op.cfg.waitQueue = os.Getenv("SIAGENT_WTQUEUE")
+	op.cfg.expire = os.Getenv("SIAGENT_EXPIRE")
+
+	f, err := os.Open(op.cfg.script)
+	defer f.Close()
+	if err != nil {
+		log.Printf("Cann't open script file: err=%s\n", err)
+		os.Exit(1)
+	}
+
+	if op.cfg.waitQueue == "" {
+		// op.cfg.waitQueue = "100"
+		op.cfg.waitQueue = "10"
+	}
+
+	if op.cfg.expire == "" {
+		// op.cfg.expire = "420"
+		op.cfg.expire = "10"
+	}
+
+	waitJobLen, _ := strconv.Atoi(op.cfg.waitQueue)
+	waitJobQueue = make(chan *Job, waitJobLen)
+	writeJobLen := waitJobLen
+	writeJobQueue = make(chan *Job, writeJobLen)
+
+	return op
+}
+
+func (op OperationAPI) Get() {
+	op.Render("client.html", clientPage{"Client Page", op.HostString()})
+}
+
+func SetupWebSocket(op *OperationAPI) {
+
+	api := iris.New()
+	api.Static("js", "./static/js", 1)
+	api.Get("/", func(ctx *iris.Context) {
+		ctx.Render("client.html", clientPage{"Client Page", ctx.HostString()})
+	})
+
+	config := config.DefaultWebsocket()
+	config.Endpoint = "/sync"
+	ws := iris.NewWebsocketServer(config)
+	iris.RegisterWebsocketServer(api, ws, api.Logger)
+
+	//iris.Config.Websocket.MaxMessageSize = config.DefaultMaxMessageSize
+	//iris.Config.Websocket.Endpoint = "/sync"
+	counter := 0
+
+	var syncImage = "syncImage"
+	/*
+	iris.Websocket.OnConnection(func(c iris.WebsocketConnection) {
+	*/
+	ws.OnConnection(func (c iris.WebsocketConnection) {
+		c.Join(syncImage)
+		log.Printf("Received new Connection\n")
+
+		c.On("sync", func(JobSTR string) {
+			job := new(Job)
+			JobJSON := []byte(JobSTR)
+			err := json.Unmarshal(JobJSON, job)
+			if err != nil {
+				log.Printf("WS Unmarshal JSON Error: err=%s\n", err)
+				os.Exit(1)
+			}
+			job.Status = WAITING
+			counter++
+			job.Id = counter
+			job.c = c
+			waitJobQueue <- job
+			writeJobQueue <- job
+		})
+		c.OnDisconnect(func() {
+			log.Printf("Disconnect one Connection\n")
+		})
+
+		go func(c iris.WebsocketConnection) {
+			k := time.NewTimer(time.Duration(15) * time.Second)
+			for {
+				select {
+				case <-k.C:
+					{
+						log.Printf("[timer] wait: %d, write: %d, runFlag: %v\n", len(waitJobQueue), len(writeJobQueue), runFlag)
+						if len(waitJobQueue) == 0 && len(writeJobQueue) == 0 && !runFlag {
+							c.Disconnect()
+						} else {
+							k.Reset(time.Duration(15) * time.Second)
+						}
+					}
+				}
+			}
+		}(c)
+	})
+
+	/*
+	iris.Static("/js", "./static/js", 1)
+	iris.API("/", *op)
+	iris.Listen(":8081")
+	*/
+	api.Listen(":8081")
+}
+
+func main() {
+	UsageAndExit()
+	op := Init()
+	go syncer(op.cfg.script, op.cfg.expire)
+	go emiter()
+	SetupWebSocket(op)
+}
