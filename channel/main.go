@@ -35,4 +35,9 @@ func main() {
 	for s := range ch4 {
 		fmt.Printf("%s: %d\n", s, len(ch4))
 	}
+
+	// it's blocking channel
+	ch5 := make(chan string)
+	// it's non-blocking channel
+	ch6 := make(chan string, 1)
 }
