@@ -12,4 +12,7 @@ func main() {
 
 	mi.Number = 10
 	fmt.Println(mi.Number)
+
+	f := 1.2
+	fmt.Println(f)
 }
