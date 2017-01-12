@@ -26,8 +26,9 @@ func (sc syncController) Post() {
 		//TODO: temporarily exit
 		return
 	}
-	waitQueue <- j
+
 	j.Status = job.WAITING
+	waitQueue <- j
 	History.Add(j)
 	sc.WriteOk("")
 	return

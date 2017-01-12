@@ -7,7 +7,7 @@ import (
 var log = mylog.Log
 
 type Job struct {
-	Id        int32    `json:"id,omitempty"`
+	Id        int32  `json:"id,omitempty"`
 	Image     string `json:"image"`
 	Tag       string `json:"tag"`
 	Status    string `json:"status,omitempty"`
@@ -20,10 +20,10 @@ type JobList struct {
 	List []*Job `json:"jobList"`
 }
 
-
 type HistoryJobList struct {
 	JobList []*Job
-	Index int32
-	Length int
-	Start int
+	Index   int32
+	Length  int
+	Start   int
+	Full    bool
 }

@@ -26,4 +26,3 @@ type OperationAPI struct {
 	lc  *listController
 	cfg *OperationConfig
 }
-
