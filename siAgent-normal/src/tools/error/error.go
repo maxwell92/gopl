@@ -1,8 +1,8 @@
 package error
 
 import (
-	mylog "tools/mylog"
 	"encoding/json"
+	mylog "tools/mylog"
 )
 
 var log = mylog.Log

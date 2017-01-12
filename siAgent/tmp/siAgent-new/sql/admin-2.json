@@ -1,0 +1,120 @@
+{
+  "list": [
+    {
+      "item": [
+        {
+          "href": "appManageHistory",
+          "includeState": "main.appManageHistory",
+          "state": "main.appManageHistory",
+          "name": "历史发布",
+          "id": 22
+        }
+      ],
+      "href": "appManage",
+      "className": "fa-adn",
+      "includeState": "main.appManage",
+      "state": "main.appManage",
+      "name": "应用管理", 
+      "id": 2
+    },
+    {
+      "href": "nodePort",
+      "className": "fa-share-alt",
+      "includeState": "main.nodePort",
+      "state": "main.nodePort",
+      "name": "NodePort管理",
+      "id": 3
+    },
+    {
+      "item": [
+        {
+          "href": "imageManageBase",
+          "includeState": "main.imageManageBase",
+          "state": "main.imageManageBase",
+          "name": "基础镜像",
+          "id": 41
+        },
+	{
+          "href": "syncImage",
+          "includeState": "main.syncImage",
+          "state": "main.syncImage",
+          "name": "同步镜像",
+          "id": 42
+        }
+      ],
+      "href": "imageManage",
+      "className": "fa-file-archive-o",
+      "includeState": "main.imageManage",
+      "state": "main.imageManage",
+      "name": "镜像管理",
+      "id": 4
+    },
+    {
+      "item": [
+        {
+          "includeState": "main.addDc",
+          "href": "addDc",
+          "state": "main.addDc",
+          "name": "添加数据中心",
+          "id": 81
+        }
+      ],
+      "href": "dcManage",
+      "className": "fa-adn",
+      "includeState": "main.dcManage",
+      "state": "main.dcManage",
+      "name": "数据中心管理",
+      "id": 8
+    },
+    {
+      "item": [
+        {
+          "href": "addOrg",
+          "includeState": "main.addOrg",
+          "state": "main.addOrg",
+          "name": "添加组织",
+          "id": 91
+        }
+      ],
+      "href": "orgManage",
+      "className": "fa-adn",
+      "includeState": "main.orgManage",
+      "state": "main.orgManage",
+      "name": "组织管理",
+      "id": 9
+    },
+    {
+      "item": [
+        {
+          "href": "createUser",
+          "includeState": "main.createUser",
+          "state": "main.createUser",
+          "name": "创建用户",
+          "id": 71
+        }
+      ],
+      "href": "userManage",
+      "className": "fa-adn",
+      "includeState": "main.userManage",
+      "state": "main.userManage",
+      "name": "用户管理",
+      "id": 7
+    },
+    {
+      "href": "topology",
+      "className": "fa-share-alt",
+      "includeState": "main.topology",
+      "state": "main.topology",
+      "name": "集群拓扑",
+      "id": 5
+    },
+    {
+      "href": "personalSetting",
+      "includeState": "main.personalSetting",
+      "className": "fa-adn",
+      "state": "main.personalSetting",
+      "name": "个人设置",
+      "id": 6
+    }
+  ]
+}

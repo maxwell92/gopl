@@ -1,6 +1,5 @@
 package agent
 
-
 const (
 	SUCC    = "SUCCEED"
 	FAILED  = "FAILED"
@@ -8,6 +7,6 @@ const (
 	RUNNING = "RUNNING"
 	WAITING = "WAITING"
 
-	USAGE =`Usage: siAgent <filepath>
+	USAGE = `Usage: siAgent <filepath>
 `
 )

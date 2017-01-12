@@ -50,9 +50,9 @@ const (
 	EKUBE_UPDATE_RESOURCEQUOTA            = 1231
 	EKUBE_GET_ALL_NAMESPACES              = 1232
 	EKUBE_UPDATE_SERVICE                  = 1233
-	EKUBE_GET_SERVICE_BY_POD	      = 1234
-	EKUBE_GET_SERVICE_BY_DEPLOYMENT	      = 1235
-	EKUBE_GET_NODE			      = 1236
+	EKUBE_GET_SERVICE_BY_POD              = 1234
+	EKUBE_GET_SERVICE_BY_DEPLOYMENT       = 1235
+	EKUBE_GET_NODE                        = 1236
 
 	EIRIS int32 = 1300
 
@@ -258,15 +258,15 @@ var Errors = map[int32]*Error{
 		LogMsg: "Kubernetes Update Service Error",
 		ErrMsg: "更新服务失败",
 	},
-	EKUBE_GET_SERVICE_BY_POD: &Error {
+	EKUBE_GET_SERVICE_BY_POD: &Error{
 		LogMsg: "Kubernetes Get Service By Pod Error",
 		ErrMsg: "根据Pod获取Service失败",
 	},
-	EKUBE_GET_SERVICE_BY_DEPLOYMENT: &Error {
+	EKUBE_GET_SERVICE_BY_DEPLOYMENT: &Error{
 		LogMsg: "Kubernetes Get Service By Deployment Error",
 		ErrMsg: "根据Deployment获取Service失败",
 	},
-	EKUBE_GET_NODE: &Error {
+	EKUBE_GET_NODE: &Error{
 		LogMsg: "Kubernetes Get Nodes Error",
 		ErrMsg: "获取计算节点信息失败",
 	},
@@ -357,7 +357,7 @@ var Errors = map[int32]*Error{
 		LogMsg: "Wrong Password",
 		ErrMsg: "密码错误",
 	},
-	EYCE_RESPAWN_POD: &Error {
+	EYCE_RESPAWN_POD: &Error{
 		LogMsg: "Respawn Error",
 		ErrMsg: "重启应用实例失败",
 	},

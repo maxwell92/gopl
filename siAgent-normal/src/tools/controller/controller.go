@@ -1,8 +1,8 @@
 package controller
 
 import (
-	myerror "tools/error"
 	"github.com/kataras/iris"
+	myerror "tools/error"
 )
 
 type Controller struct {

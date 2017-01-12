@@ -1,11 +1,10 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"tools/agent"
 )
-
 
 func UsageAndExit() {
 	if len(os.Args) != 1 {
@@ -19,5 +18,3 @@ func main() {
 	UsageAndExit()
 	agent.Run()
 }
-
-

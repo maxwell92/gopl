@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-//	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -63,7 +62,7 @@ var runFlag bool
 func (j Job) Encode() string {
 	jobBYTE, err := json.Marshal(j)
 	if err != nil {
-		log.Printf("Job Encoding Error: err=%s\n", err)
+		log.Infof("Job Encoding Error: err=%s", err)
 		os.Exit(1)
 	}
 	jobSTR := string(jobBYTE)
@@ -77,10 +76,10 @@ func syncer(script, expire string) {
 			{
 				job.Expire, _ = strconv.Atoi(expire)
 				job.Status = RUNNING
-				log.Printf("%s: Waiting --> Running\n", job.Image+":"+job.Tag)
+				log.Infof("%s: Waiting --> Running", job.Image+":"+job.Tag)
 				cmd := exec.Command("/bin/bash", "-C", script, job.Image, job.Tag)
 				if cmd == nil {
-					log.Printf("Get Command Error\n")
+					log.Infof("Get Command Error")
 					os.Exit(1)
 				}
 
@@ -92,11 +91,11 @@ func syncer(script, expire string) {
 				runFlag = false
 				if err != nil {
 					job.Status = FAILED
-					log.Printf("%s: Running --> Killed\n", job.Image+":"+job.Tag)
+					log.Infof("%s: Running --> Killed", job.Image+":"+job.Tag)
 					writeJobQueue <- job
 				} else {
 					job.Status = SUCC
-					log.Printf("%s: Running --> Finish\n", job.Image+":"+job.Tag)
+					log.Infof("%s: Running --> Finish", job.Image+":"+job.Tag)
 					writeJobQueue <- job
 				}
 			}
@@ -140,7 +139,7 @@ func Init() *OperationAPI {
 	f, err := os.Open(op.cfg.script)
 	defer f.Close()
 	if err != nil {
-		log.Printf("Cann't open script file: err=%s\n", err)
+		log.Infof("Cann't open script file: err=%s", err)
 		os.Exit(1)
 	}
 
@@ -184,14 +183,14 @@ func SetupWebSocket(op *OperationAPI) {
 	var syncImage = "syncImage"
 	ws.OnConnection(func (c iris.WebsocketConnection) {
 		c.Join(syncImage)
-		log.Printf("Received new Connection\n")
+		log.Infof("Received new Connection")
 
 		c.On("sync", func(JobSTR string) {
 			job := new(Job)
 			JobJSON := []byte(JobSTR)
 			err := json.Unmarshal(JobJSON, job)
 			if err != nil {
-				log.Printf("WS Unmarshal JSON Error: err=%s\n", err)
+				log.Infof("WS Unmarshal JSON Error: err=%s", err)
 				os.Exit(1)
 			}
 			job.Status = WAITING
@@ -202,7 +201,7 @@ func SetupWebSocket(op *OperationAPI) {
 			writeJobQueue <- job
 		})
 		c.OnDisconnect(func() {
-			log.Printf("Disconnect one Connection\n")
+			log.Infof("Disconnect one Connection")
 		})
 
 		go func(c iris.WebsocketConnection) {
@@ -211,7 +210,7 @@ func SetupWebSocket(op *OperationAPI) {
 				select {
 				case <-k.C:
 					{
-						log.Printf("[timer] wait: %d, write: %d, runFlag: %v\n", len(waitJobQueue), len(writeJobQueue), runFlag)
+						log.Infof("[timer] wait: %d, write: %d, runFlag: %v", len(waitJobQueue), len(writeJobQueue), runFlag)
 						if len(waitJobQueue) == 0 && len(writeJobQueue) == 0 && !runFlag {
 							c.Disconnect()
 						} else {
