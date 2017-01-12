@@ -1,122 +1,62 @@
 package agent
 
 import (
-	"encoding/json"
 	"os"
 	"os/exec"
 	"strconv"
-	"time"
+	"tools/job"
 
 	"github.com/kataras/iris"
 )
 
-var waitQueue chan *Job
-var History *HistoryJobList
+// waitQueue and History couldn't be too long. 10 is perfect
+
+var waitQueue chan *job.Job
+var History *job.HistoryJobList
 
 var runFlag bool
-
-func (j Job) Encode() string {
-	jobBYTE, err := json.Marshal(j)
-	if err != nil {
-		log.Infof("Job Encoding Error: err=%s", err)
-		os.Exit(1)
-	}
-	jobSTR := string(jobBYTE)
-	return jobSTR
-}
-
-func (h *HistoryJobList) Clean() {
-	/*
-	var split int
-	if judge := len(h.jobList) % 2; judge == 0 {
-		split = h.index / 2
-	} else {
-		split = (h.index - 1) / 2
-	}
-
-	for i := 0; i < split; i++ {
-		h.jobList = append(h.jobList, &Job{})
-	}
-
-	h.jobList = h.jobList[split:]
-	h.index = len(h.jobList) - split
-	*/
-
-	split := h.finished - 2
-	for i := 1; i < split; i++ {
-		h.jobList = append(h.jobList, &Job{})
-	}
-
-	h.jobList = h.jobList[split:]
-	h.index = len(h.jobList) - split
-
-
-}
-
-func gc(history *HistoryJobList) {
-	t := time.NewTimer(time.Duration(30) * time.Second)
-	for {
-		select {
-		case <-t.C:
-			{
-				if len(history.jobList) == history.index {
-					history.Clean()
-					log.Infof("finQueue gc has removed half of the queue")
-				}
-			}
-		}
-	}
-
-}
 
 func syncer(op *OperationAPI) {
 	for {
 		select {
-		case job := <-waitQueue:
+		case j := <-waitQueue:
 			{
-				job.Expire, _ = strconv.Atoi(op.cfg.expire)
-				History.jobList[job.Id].Status = RUNNING
-				job.Status = RUNNING
-				log.Infof("%s: Waiting --> Running", job.Image+":"+job.Tag)
-				cmd := exec.Command("/bin/bash", "-C", op.cfg.script, job.Image, job.Tag)
+				j.Expire, _ = strconv.Atoi(op.cfg.expire)
+				j.Status = job.RUNNING
+				History.JobList[History.Start].Status = job.RUNNING
+				log.Infof("%s: Waiting --> Running", j.Image+":"+j.Tag)
+				cmd := exec.Command("/bin/bash", "-C", op.cfg.script, j.Image, j.Tag)
 				if cmd == nil {
 					log.Infof("Get Command Error")
 					os.Exit(1)
 				}
 
-				go job.killer(cmd)
+				go j.Killer(cmd)
 
 				runFlag = true
 				err := cmd.Run()
 				runFlag = false
 				if err != nil {
-					job.Status = FAILED
-					History.jobList[job.Id].Status = FAILED
-					History.finished = job.Id
-					log.Infof("%s: Running --> Killed", job.Image+":"+job.Tag)
+					j.Status = job.FAILED
+					History.JobList[History.Start].Status = job.FAILED
+					log.Infof("%s: Running --> Killed", j.Image+":"+j.Tag)
 				} else {
-					job.Status = SUCC
-					History.jobList[job.Id].Status = SUCC
-					History.finished = job.Id
-					log.Infof("%s: Running --> Finish", job.Image+":"+job.Tag)
+					j.Status = job.SUCC
+					History.JobList[History.Start].Status = job.SUCC
+					log.Infof("%s: Running --> Finish", j.Image+":"+j.Tag)
 				}
 			}
 		}
 	}
 }
 
-func (j Job) killer(c *exec.Cmd) {
-	k := time.NewTimer(time.Duration(j.Expire) * time.Second)
-	<-k.C
-	c.Process.Kill()
-}
+
 
 func Init() *OperationAPI {
 	op := new(OperationAPI)
 	op.cfg = new(OperationConfig)
 	op.sc = new(syncController)
 	op.lc = new(listController)
-
 
 	op.cfg.script = os.Getenv("SIAGENT_SCRIPT")
 	op.cfg.waitQueueLen = os.Getenv("SIAGENT_WTQUEUE")
@@ -135,59 +75,22 @@ func Init() *OperationAPI {
 	}
 
 	if op.cfg.expire == "" {
+		// 420 = 24 * 60 / 7
 		// op.cfg.expire = "420"
 		op.cfg.expire = "10"
 	}
 
 	waitQueueLen, _ := strconv.Atoi(op.cfg.waitQueueLen)
-	waitQueue = make(chan *Job, waitQueueLen)
+	waitQueue = make(chan *job.Job, waitQueueLen)
 
-	History = new(HistoryJobList)
-	History.jobList = make([]*Job, waitQueueLen)
-	History.index = 1
-	History.finished = 1
-	go gc(History)
+	History = job.NewHistory(waitQueueLen)
 
 	return op
 }
 
-func (lc listController) Get() {
-	jobs := new(JobList)
-	jobs.jobList = History.jobList[1:History.finished + 1]
 
-	listJSON, err := json.Marshal(jobs.jobList)
-	if err != nil {
-		log.Errorf("Get")
-	}
-
-	lc.WriteOk(string(listJSON))
-	return
-}
-
-func (sc syncController) Post() {
-	job := new(Job)
-	err := sc.ReadJSON(job)
-	if err != nil {
-		log.Errorf("ReadJSON Error: err=%s", err)
-		//TODO: temporarily exit
-		return
-	}
-	waitQueue <- job
-	job.Id = History.index
-	job.Status = WAITING
-	History.jobList[History.index] = job
-	History.finished = History.index
-	History.index++
-	sc.WriteOk("")
-	return
-}
 
 func (op OperationAPI) SetupRouter() {
-	iris.Static("js", "./static/js", 1)
-
-	iris.Get("/", func(ctx *iris.Context) {
-		ctx.Render("client.html", clientPage{"Client Page", ctx.HostString()})
-	})
 
 	iris.API("/api/v1/list", *op.lc)
 	iris.API("/api/v1/sync", *op.sc)
