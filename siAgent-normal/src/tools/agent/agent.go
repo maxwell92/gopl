@@ -10,7 +10,6 @@ import (
 )
 
 // waitQueue and History couldn't be too long. 10 is perfect
-
 var waitQueue chan *job.Job
 var History *job.HistoryJobList
 
@@ -77,7 +76,7 @@ func Init() *OperationAPI {
 	waitQueueLen, _ := strconv.Atoi(op.cfg.waitQueueLen)
 	waitQueue = make(chan *job.Job, waitQueueLen)
 
-	History = job.NewHistory(waitQueueLen)
+	History = job.NewHistory(waitQueueLen + 2)
 
 	return op
 }

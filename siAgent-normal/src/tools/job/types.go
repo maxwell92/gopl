@@ -2,6 +2,7 @@ package job
 
 import (
 	"tools/mylog"
+	"tools/queue"
 )
 
 var log = mylog.Log
@@ -19,11 +20,16 @@ type Job struct {
 type JobList struct {
 	List []*Job `json:"jobList"`
 }
-
+/*
 type HistoryJobList struct {
 	JobList []*Job
 	Index   int32
 	Length  int
 	Start   int
 	Full    bool
+}
+*/
+
+type HistoryJobList struct {
+	JobList *queue.Queue
 }

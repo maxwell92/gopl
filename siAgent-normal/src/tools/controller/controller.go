@@ -18,6 +18,9 @@ type IController interface {
 
 func (c *Controller) WriteError() {
 	c.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	c.Response.Header.Set("Access-Control-Allow-Methods", "POST")
+	c.Response.Header.Set("Access-Control-Allow-Methods", "GET")
+	c.Response.Header.Set("Access-Control-Allow-Headers", "x-requested-with, content-type")
 	c.Response.Header.Set("Cache-Control", "no-store")
 	c.Write(c.Ye.String())
 }
@@ -32,6 +35,9 @@ func (c *Controller) CheckError() bool {
 
 func (c *Controller) WriteOk(msg string) {
 	c.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	c.Response.Header.Set("Access-Control-Allow-Methods", "POST")
+	c.Response.Header.Set("Access-Control-Allow-Methods", "GET")
+	c.Response.Header.Set("Access-Control-Allow-Headers", "x-requested-with, content-type")
 	c.Ye = myerror.NewYceError(myerror.EOK, msg)
 	c.Response.Header.Set("Cache-Control", "no-store")
 	c.Write(c.Ye.String())
