@@ -20,7 +20,6 @@ func syncer(op *OperationAPI) {
 			{
 				j.Expire, _ = strconv.Atoi(op.cfg.expire)
 				j.Status = job.RUNNING
-				//History.JobList[History.Start].Status = job.RUNNING
 				History.Update(j, job.RUNNING)
 				cmd := exec.Command("/bin/bash", "-C", op.cfg.script, j.Image, j.Tag)
 				if cmd == nil {
@@ -33,11 +32,9 @@ func syncer(op *OperationAPI) {
 				err := cmd.Run()
 				if err != nil {
 					j.Status = job.FAILED
-					//	History.JobList[History.Start].Status = job.FAILED
 					History.Update(j, job.FAILED)
 				} else {
 					j.Status = job.SUCC
-					//	History.JobList[History.Start].Status = job.SUCC
 					History.Update(j, job.SUCC)
 				}
 			}

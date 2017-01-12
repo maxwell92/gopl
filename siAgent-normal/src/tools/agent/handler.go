@@ -5,25 +5,10 @@ import (
 	"tools/job"
 )
 
-/*
-func (lc listController) Get() {
-	jobs := new(job.JobList)
-	jobs.List = History.List()
-
-	listJSON, err := json.Marshal(jobs.List)
-	if err != nil {
-		log.Errorf("Marshal Json Error: %s", err)
-	}
-
-	lc.WriteOk(string(listJSON))
-	return
-}
-*/
 
 func (lc listController) Get() {
 	jobs := History.List()
 
-	// list := jobs.([]*Job)
 	list := jobs
 
 	listJSON, err := json.Marshal(list)

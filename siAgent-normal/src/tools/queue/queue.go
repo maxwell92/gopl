@@ -25,7 +25,6 @@ func New(maxLen int) *Queue {
 
 func (q *Queue) EnQueue(e interface{}) {
 
-	// fmt.Printf("max: %d, now: %d\n", q.Maxlen, q.Bottom - q.Top + 1)
 	if q.Maxlen == q.Bottom - q.Top {
 		q.Bottom = q.Top
 		q.Full = true
