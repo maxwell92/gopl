@@ -87,6 +87,7 @@ const (
 	EINVALID_PARAM int32 = 1605
 
 	EGDK_IOUTIL int32 = 1700
+	ESYNC_EXIST    int32 = 1800
 )
 
 var Errors = map[int32]*Error{
@@ -405,5 +406,9 @@ var Errors = map[int32]*Error{
 	EGDK_IOUTIL: &Error{
 		LogMsg: "ioutil ReadAll error",
 		ErrMsg: "读取HTTP响应体失败",
+	},
+	ESYNC_EXIST: &Error {
+		LogMsg: "Image:Tag in queue",
+		ErrMsg: "该镜像已在同步队列",
 	},
 }

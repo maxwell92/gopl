@@ -19,7 +19,7 @@ func syncer(op *OperationAPI) {
 		case j := <-waitQueue:
 			{
 				j.Expire, _ = strconv.Atoi(op.cfg.expire)
-				j.Status = job.RUNNING
+				//j.Status = job.RUNNING
 				History.Update(j, job.RUNNING)
 				cmd := exec.Command("/bin/bash", "-C", op.cfg.script, j.Image, j.Tag)
 				if cmd == nil {
@@ -31,10 +31,10 @@ func syncer(op *OperationAPI) {
 
 				err := cmd.Run()
 				if err != nil {
-					j.Status = job.FAILED
+					//j.Status = job.FAILED
 					History.Update(j, job.FAILED)
 				} else {
-					j.Status = job.SUCC
+					//j.Status = job.SUCC
 					History.Update(j, job.SUCC)
 				}
 			}
@@ -48,14 +48,14 @@ func Init() *OperationAPI {
 	op.sc = new(syncController)
 	op.lc = new(listController)
 
-	op.cfg.script = os.Getenv("SIAGENT_SCRIPT")
-	op.cfg.waitQueueLen = os.Getenv("SIAGENT_WTQUEUE")
-	op.cfg.expire = os.Getenv("SIAGENT_EXPIRE")
+	op.cfg.script = os.Getenv("SIAGENTSCRIPT")
+	op.cfg.waitQueueLen = os.Getenv("SIAGENTWTQUEUE")
+	op.cfg.expire = os.Getenv("SIAGENTEXPIRE")
 
 	f, err := os.Open(op.cfg.script)
 	defer f.Close()
 	if err != nil {
-		log.Infof("Cann't open script file: err=%s", err)
+		log.Infof("Cann't open script file %s: err=%s", op.cfg.script, err)
 		os.Exit(1)
 	}
 

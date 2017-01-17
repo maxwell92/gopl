@@ -2,9 +2,9 @@ package agent
 
 import (
 	"encoding/json"
+	//myerror "tools/error"
 	"tools/job"
 )
-
 
 func (lc listController) Get() {
 	jobs := History.List()
@@ -19,7 +19,6 @@ func (lc listController) Get() {
 	lc.WriteOk(string(listJSON))
 	return
 
-
 }
 
 func (sc syncController) Post() {
@@ -32,8 +31,27 @@ func (sc syncController) Post() {
 	}
 
 	j.Status = job.WAITING
+
+	/*
+		if !History.Empty() {
+			if History.Exist(j) {
+				sc.Ye = myerror.NewYceError(myerror.ESYNC_EXIST, "")
+				sc.WriteError()
+			} else {
+				waitQueue <- j
+				History.Add(j)
+				sc.WriteOk("")
+			}
+		} else {
+			waitQueue <- j
+			History.Add(j)
+			sc.WriteOk("")
+		}
+
+	*/
 	waitQueue <- j
 	History.Add(j)
 	sc.WriteOk("")
+
 	return
 }

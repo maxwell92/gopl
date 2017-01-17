@@ -1,6 +1,6 @@
 package queue
 
-import "fmt"
+//import "fmt"
 
 type Queue struct {
 	Elems []interface{}
@@ -19,7 +19,7 @@ func New(maxLen int) *Queue {
 		Maxlen: maxLen,
 	}
 
-	fmt.Printf("Queue: %d\n", q.Maxlen)
+	//fmt.Printf("Queue: %d\n", q.Maxlen)
 	return q
 }
 
