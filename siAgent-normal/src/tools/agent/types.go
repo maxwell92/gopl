@@ -11,6 +11,7 @@ type OperationConfig struct {
 	script       string
 	waitQueueLen string
 	expire       string
+	port         string
 }
 
 type syncController struct {

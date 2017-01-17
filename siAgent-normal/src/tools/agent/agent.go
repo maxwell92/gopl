@@ -7,6 +7,7 @@ import (
 	"tools/job"
 
 	"github.com/kataras/iris"
+	"fmt"
 )
 
 // waitQueue and History couldn't be too long. 10 is perfect
@@ -51,6 +52,7 @@ func Init() *OperationAPI {
 	op.cfg.script = os.Getenv("SIAGENTSCRIPT")
 	op.cfg.waitQueueLen = os.Getenv("SIAGENTWTQUEUE")
 	op.cfg.expire = os.Getenv("SIAGENTEXPIRE")
+	op.cfg.port = ":" + os.Getenv("SIAGENTPORT")
 
 	f, err := os.Open(op.cfg.script)
 	defer f.Close()
@@ -70,6 +72,10 @@ func Init() *OperationAPI {
 		op.cfg.expire = "10"
 	}
 
+	if op.cfg.port == "" {
+		op.cfg.port = ":" + "8081"
+	}
+
 	waitQueueLen, _ := strconv.Atoi(op.cfg.waitQueueLen)
 	waitQueue = make(chan *job.Job, waitQueueLen)
 
@@ -82,8 +88,8 @@ func (op OperationAPI) SetupRouter() {
 
 	iris.API("/api/v1/list", *op.lc)
 	iris.API("/api/v1/sync", *op.sc)
-
-	iris.Listen(":8081")
+	fmt.Println(op.cfg.port)
+	iris.Listen(op.cfg.port)
 }
 
 func Run() {
