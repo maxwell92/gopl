@@ -33,35 +33,3 @@ func (s *Sorter) Less(i, j int) bool {
 
 	return s.Lessf[k](p, q)
 }
-
-/*
-func (s *Sorter) Sort(elems []interface{}) {
-	s.elems = elems
-	sort.Sort(s)
-}
-
-func (s *Sorter) Len() int {
-	return len(s.elems)
-}
-
-func (s *Sorter) Swap(i, j int) {
-	s.elems[i], s.elems[j] = s.elems[j], s.elems[i]
-}
-
-func (s *Sorter) Less(i, j int) bool {
-	p, q := &s.elems[i], &s.elems[j]
-
-	var k int
-	for k = 0; k < len(s.less)-1; k++ {
-		less := s.less[k]
-		switch {
-		case less(p, q):
-			return true
-		case less(q, p):
-			return false
-		}
-	}
-
-	return s.less[k](p, q)
-}
-*/

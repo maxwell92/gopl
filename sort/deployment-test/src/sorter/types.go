@@ -10,12 +10,3 @@ type Sorter struct {
 	elems []IResource
 	Lessf []LessFunc
 }
-
-/*
-type LessFunc func(d1, d2 interface{}) bool
-
-type Sorter struct {
-	elems []interface{}
-	less  []LessFunc
-}
-*/
