@@ -18,4 +18,11 @@ func main() {
 		str = "unknown"
 	}
 	fmt.Println(str)
+
+	switch {
+	case str == "one":
+		fmt.Println("ONE")
+	case str == "not one":
+		fmt.Println("TWO")
+	}
 }
