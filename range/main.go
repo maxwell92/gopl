@@ -21,6 +21,7 @@ func main() {
 	garage[2] = lexus
 
 	for i, c := range garage {
-		fmt.Printf("%d, %s\n", i, c.Name)
+		fmt.Printf("%d, %s, %p, %p\n", i, c.Name, &c, c)
 	}
+
 }
