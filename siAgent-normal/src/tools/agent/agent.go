@@ -28,7 +28,7 @@ func syncer(op *OperationAPI) {
 					os.Exit(1)
 				}
 
-				go j.Killer(cmd)
+				// go j.Killer(cmd)
 
 				err := cmd.Run()
 				if err != nil {
@@ -54,6 +54,7 @@ func Init() *OperationAPI {
 	op.cfg.expire = os.Getenv("SIAGENTEXPIRE")
 	op.cfg.port = ":" + os.Getenv("SIAGENTPORT")
 
+	// Open the target script file to see if it's well prepared
 	f, err := os.Open(op.cfg.script)
 	defer f.Close()
 	if err != nil {
