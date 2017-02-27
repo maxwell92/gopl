@@ -7,9 +7,10 @@ func main() {
 	for {
 		select {
 		case ch <- 0:
-		case ch <- 1:
+			//case ch <- 1:
 		}
 		// i := <-ch
 		//		fmt.Printf("value: %d\n", i)
+		fmt.Println("A")
 	}
 }
