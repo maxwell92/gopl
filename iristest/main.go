@@ -19,10 +19,12 @@ func (op *OperationAPI) sync() {
 	fmt.Printf("sync, op: %v, %x\n", op, &op)
 	fmt.Printf("sync, filepath: %s, %x\n", op.path, &op.path)
 	fmt.Printf("sync, Name: %s, %x\n", op.person.Name, &op.person.Name)
+
 }
 
 // the op here is not the same with the one in iris / Init() / main
 func (op OperationAPI) Get() {
+	fmt.Printf("[%p]\n", op)
 	op.person = new(Someone)
 	op.person.Name = "Moss"
 
@@ -50,5 +52,6 @@ func main() {
 
 	fmt.Printf("main, op: %v, %x\n", op, &op)
 	iris.API("/sync", *op)
+	fmt.Printf("[%p]\n", op)
 	iris.Listen(":8081")
 }
