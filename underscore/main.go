@@ -8,15 +8,20 @@ type Object interface {
 	Get()
 }
 
-type Car struct {
+type Unstructured struct {
 	Name string
 }
 
-func (c *Car) Get() {
+// 如果实现了Object接口，一切正常
+func (u *Unstructured) Get() {}
 
-}
+// 如果只使用了下面的方法，而没有实现Object接口，会有如下报错：
+// ./main.go:19: cannot use Unstructured literal (type *Unstructured) as type Object in assignment:
+// *Unstructured does not implement Object (missing Get method)
 
-var _ Object = &Car{}
+// func (u *Unstructured) Got() {}
+
+var _ Object = &Unstructured{}
 
 func main() {
 	fmt.Println("Hello")
