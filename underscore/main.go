@@ -1,3 +1,4 @@
+// go version 1.7
 package main
 
 import (
