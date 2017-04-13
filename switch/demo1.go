@@ -12,5 +12,7 @@ func main() {
 		fallthrough
 	case 3:
 		fmt.Println(x) // 2
+	case 4:
+		fmt.Println(x)
 	}
 }
