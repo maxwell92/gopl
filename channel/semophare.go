@@ -11,7 +11,7 @@ func main() {
 	runtime.GOMAXPROCS(4)
 	var wg sync.WaitGroup
 
-	sem := make(chan struct{}, 2)
+	sem := make(chan struct{}, 2) //control how many routines could run at a time
 
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
