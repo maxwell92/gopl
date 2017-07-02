@@ -20,7 +20,7 @@ func main() {
 
 	command1 := "echo"
 	args1 := []string{
-		"Hello World",
+		"Hello\nWorld",
 	}
 	cmd1 := exec.Command(command1, args1...)
 	cmdOutput, err := cmd1.StdoutPipe()
@@ -32,7 +32,7 @@ func main() {
 
 	command2 := "grep"
 	args2 := []string{
-		"Hello a",
+		"o",
 	}
 	cmd2 := exec.Command(command2, args2...)
 	cmd2.Stdin = cmdOutput
