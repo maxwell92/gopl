@@ -13,6 +13,10 @@ func main() {
 	str5 := "    "
 	str6 := " a"
 	str7 := "a "
+	str8 := "yce-sasfasdf"
+	len8 := len(strings.Split(str8, "-"))
+	str9 := "yce-dfajlk-123123"
+	len9 := len(strings.Split(str9, "-"))
 
 	fmt.Printf("str1: %d, %s\n", len(strings.Split(str1, "#")), strings.Split(str1, "#")[0])
 	fmt.Printf("str2: %d, %s\n", len(strings.Split(str2, "#")), strings.Split(str2, "#")[0])
@@ -21,4 +25,6 @@ func main() {
 	fmt.Printf("str5: %d, %s\n", len(strings.Split(str5, "#")), strings.Split(str5, "#")[0])
 	fmt.Printf("str6: %d, %s\n", len(strings.Split(str6, "#")), strings.Split(str6, "#")[0])
 	fmt.Printf("str7: %d, %s\n", len(strings.Split(str7, "#")), strings.Split(str7, "#")[0])
+	fmt.Printf("str8: %d, %s\n", len(strings.Split(str8, "-")), strings.Split(str8, "-")[len8-2])
+	fmt.Printf("str9: %d, %s\n", len(strings.Split(str9, "-")), strings.Split(str9, "-")[len9-3])
 }

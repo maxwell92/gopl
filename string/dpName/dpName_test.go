@@ -24,60 +24,75 @@ func Test_GetDpName(t *testing.T) {
 	}
 
 	fmt.Println("--group2--")
-	podName = "abc"
+	podName = "yyk"
 	fmt.Println(GetDpNameByPodName(podName))
-	if GetDpNameByPodName(podName) != "abc" {
+	if GetDpNameByPodName(podName) != "yyk" {
 		fmt.Println("err")
 		return
 	}
-	svcName = "abc"
+	svcName = "yyk"
 	fmt.Println(GetDpNameBySvcName(svcName))
-	if GetDpNameBySvcName(svcName) != "abc" {
+	if GetDpNameBySvcName(svcName) != "yyk" {
 		fmt.Println("err")
 		return
 	}
 
 	fmt.Println("--group3--")
-	podName = "abc-1231111"
+	podName = "yyk-notice"
 	fmt.Println(GetDpNameByPodName(podName))
-	if GetDpNameByPodName(podName) != "abc-1231111" {
+	if GetDpNameByPodName(podName) != "yyk-notice" {
 		fmt.Println("err")
 		return
 	}
-	svcName = "abc-svc"
+	svcName = "yyk-svc"
 	fmt.Println(GetDpNameBySvcName(svcName))
-	if GetDpNameBySvcName(svcName) != "abc" {
+	if GetDpNameBySvcName(svcName) != "yyk" {
 		fmt.Println("err")
 		return
 	}
 
 	fmt.Println("--group4--")
-	podName = "abc-1231231-12313"
+	podName = "yyk-notice-service"
 	fmt.Println(GetDpNameByPodName(podName))
-	if GetDpNameByPodName(podName) != "abc" {
+	if GetDpNameByPodName(podName) != "yyk" {
 		fmt.Println("err")
 		return
 	}
-	svcName = "abc-def-svc"
+	svcName = "yyk-notice-svc"
 	fmt.Println(GetDpNameBySvcName(svcName))
-	if GetDpNameBySvcName(svcName) != "abc-def" {
+	if GetDpNameBySvcName(svcName) != "yyk-notice" {
 		fmt.Println("err")
 		return
 	}
 
 	fmt.Println("--group5--")
-	podName = "abc-notice-1231231-1231231"
+	podName = "yyk-notice-1231231-1231231"
 	fmt.Println(GetDpNameByPodName(podName))
-	if GetDpNameByPodName(podName) != "abc-notice" {
+	if GetDpNameByPodName(podName) != "yyk-notice" {
 		fmt.Println("err")
 		return
 	}
-	svcName = "abc-123123-abc-svc"
+	svcName = "yyk-notice-service-svc"
 	fmt.Println(GetDpNameBySvcName(svcName))
-	if GetDpNameBySvcName(svcName) != "abc-123123-abc" {
+	if GetDpNameBySvcName(svcName) != "yyk-notice-service" {
 		fmt.Println("err")
 		return
 	}
+
+	fmt.Println("--group6--")
+	podName = "yyk-no-ser-hess-1765227074-3yuzk"
+	fmt.Println(GetDpNameByPodName(podName))
+	if GetDpNameByPodName(podName) != "yyk-no-ser-hess" {
+		fmt.Println("err")
+		return
+	}
+	svcName = "yyk-no-ser-hess-svc"
+	fmt.Println(GetDpNameBySvcName(svcName))
+	if GetDpNameBySvcName(svcName) != "yyk-no-ser-hess" {
+		fmt.Println("err")
+		return
+	}
+
 }
 
 /*
