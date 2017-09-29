@@ -1,0 +1,14 @@
+{
+    "version": "3.1.4+20170711",
+    "inputs": [
+        {
+            "lang": "go",
+            "dir": "/Users/yp-tc-m-7019/mworks/gopl/apidoc-test",
+            "recursive": true
+        }
+    ],
+    "output": {
+        "dir": "/Users/yp-tc-m-7019/mworks/gopl/apidoc-test/doc",
+        "type": "html"
+    }
+}
