@@ -19,8 +19,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-        cfg.Header["Userid"] = []string{"3"}
-        cfg.Header["Orgid"] = []string{"1"}
+        cfg.Header["Userid"] = []string{"1"}
+        cfg.Header["Orgid"] = []string{"3"}
 	ws, err := websocket.DialConfig(cfg)
 	if err != nil {
 		log.Fatal(err)
