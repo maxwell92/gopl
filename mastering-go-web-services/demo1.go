@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+
+	"net/http"
+	"sync"
+	"sync/atomic"
+
 )
 
 type API struct{
